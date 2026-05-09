@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Personality Test — A Wizarding World Welcome</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d080;
+  --gold-dark: #8a6a1a;
+  --parchment: #f5ecd7;
+  --parchment-dark: #e8d5b0;
+  --ink: #1a1008;
+  --bg: #07060e;
+  --card: rgba(12,10,22,0.97);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'IM Fell English', serif;
+  color: var(--parchment);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:-1;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(139,0,0,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 85%, rgba(14,42,92,0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(26,74,46,0.08) 0%, transparent 60%),
+    #07060e;
+}
+
+.particles { position:fixed; inset:0; pointer-events:none; z-index:0; }
+.p {
+  position:absolute; width:2px; height:2px;
+  background:var(--gold-light); border-radius:50%;
+  animation:twinkle var(--d,4s) ease-in-out infinite var(--del,0s);
+}
+@keyframes twinkle { 0%,100%{opacity:0.05;} 50%{opacity:0.7;} }
+
+/* PAGE LAYOUT */
+.page {
+  position:relative; z-index:1;
+  max-width:700px;
+  margin:0 auto;
+  padding:50px 24px 80px;
+}
+
+/* INTRO */
+#screen-intro { text-align:center; animation:fadeUp 0.8s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+.hat-wrap { position:relative; display:inline-block; margin-bottom:8px; }
+.hat-emoji {
+  font-size:80px;
+  display:block;
+  animation:hatFloat 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 24px rgba(201,168,76,0.5));
+}
+@keyframes hatFloat {
+  0%,100%{ transform:translateY(0) rotate(-3deg); }
+  50%{ transform:translateY(-14px) rotate(3deg); }
+}
+
+.title {
+  font-family:'Cinzel Decorative', cursive;
+  font-size:clamp(22px,5vw,42px);
+  color:var(--gold-light);
+  text-shadow:0 0 40px rgba(201,168,76,0.35);
+  line-height:1.3;
+  margin:16px 0 10px;
+}
+.subtitle {
+  font-family:'Cinzel', serif;
+  font-size:11px;
+  letter-spacing:4px;
+  color:var(--gold-dark);
+  text-transform:uppercase;
+  margin-bottom:28px;
+}
+.intro-text {
+  font-size:15px;
+  color:var(--parchment-dark);
+  max-width:520px;
+  margin:0 auto 32px;
+  line-height:1.9;
+  font-style:italic;
+  opacity:0.85;
+}
+
+.rule { width:400px; max-width:80%; height:1px; background:linear-gradient(90deg,transparent,var(--gold-dark),transparent); margin:0 auto 32px; }
+
+.start-btn {
+  font-family:'Cinzel', serif;
+  font-size:13px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:16px 40px;
+  background:transparent;
+  border:1px solid var(--gold);
+  border-radius:3px;
+  color:var(--gold-light);
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+}
+.start-btn::before {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.1),transparent);
+  opacity:0; transition:opacity 0.3s;
+}
+.start-btn:hover { box-shadow:0 0 30px rgba(201,168,76,0.3); color:var(--gold-light); }
+.start-btn:hover::before { opacity:1; }
+
+/* QUIZ */
+#screen-quiz { display:none; }
+
+.progress-area { margin-bottom:30px; }
+.prog-label {
+  font-family:'Cinzel', serif;
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--gold-dark);
+  text-transform:uppercase;
+  margin-bottom:8px;
+  text-align:center;
+}
+.prog-track {
+  width:100%; height:4px;
+  background:rgba(255,255,255,0.06);
+  border-radius:2px; overflow:hidden;
+}
+.prog-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold));
+  border-radius:2px;
+  transition:width 0.5s ease;
+}
+
+.q-card {
+  background:var(--card);
+  border:1px solid var(--gold-dark);
+  border-radius:4px;
+  padding:36px 32px;
+  display:none;
+  animation:fadeUp 0.4s ease;
+}
+@media(max-width:480px){ .q-card{ padding:24px 20px; } }
+.q-card.active { display:block; }
+
+.q-num {
+  font-family:'Cinzel', serif;
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--gold-dark);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.q-text {
+  font-family:'Cinzel', serif;
+  font-size:clamp(16px,2.8vw,22px);
+  color:var(--gold-light);
+  line-height:1.45;
+  margin-bottom:28px;
+}
+
+.ans-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:500px){ .ans-grid{ grid-template-columns:1fr; } }
+
+.ans-btn {
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(201,168,76,0.2);
+  border-radius:3px;
+  padding:16px 18px;
+  color:var(--parchment-dark);
+  font-family:'IM Fell English', serif;
+  font-size:14px;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.25s;
+  line-height:1.55;
+  position:relative;
+  overflow:hidden;
+}
+.ans-btn::before {
+  content:'';
+  position:absolute; left:0; top:0;
+  width:3px; height:100%;
+  background:var(--gold);
+  transform:scaleY(0);
+  transition:transform 0.25s;
+  transform-origin:bottom;
+}
+.ans-btn:hover {
+  background:rgba(201,168,76,0.08);
+  border-color:var(--gold);
+  color:var(--parchment);
+  transform:translateX(5px);
+}
+.ans-btn:hover::before { transform:scaleY(1); }
+.ans-btn.selected {
+  background:rgba(201,168,76,0.12);
+  border-color:var(--gold);
+  color:var(--parchment);
+}
+.ans-btn.selected::before { transform:scaleY(1); }
+
+/* RESULT */
+#screen-result { display:none; text-align:center; animation:fadeUp 0.8s ease; }
+
+.result-box {
+  border-radius:4px;
+  padding:44px 32px 36px;
+  margin-bottom:28px;
+  border:1px solid;
+  position:relative;
+  overflow:hidden;
+}
+.result-box::before {
+  content:var(--crest-char,'');
+  position:absolute;
+  font-size:200px;
+  opacity:0.04;
+  bottom:-40px; right:-20px;
+  pointer-events:none;
+  line-height:1;
+}
+
+.crest {
+  font-size:90px;
+  display:block;
+  margin:0 auto 20px;
+  animation:crst 0.9s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes crst {
+  from{ transform:scale(0.2) rotate(-20deg); opacity:0; }
+  to  { transform:scale(1) rotate(0); opacity:1; }
+}
+
+.house-name {
+  font-family:'Cinzel Decorative', cursive;
+  font-size:clamp(28px,6vw,50px);
+  margin-bottom:8px;
+  text-shadow:0 0 40px currentColor;
+}
+.house-words {
+  font-family:'Cinzel', serif;
+  font-size:12px;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  opacity:0.65;
+  margin-bottom:24px;
+}
+.house-desc {
+  font-size:15px;
+  line-height:1.85;
+  max-width:520px;
+  margin:0 auto 28px;
+  opacity:0.85;
+  font-style:italic;
+}
+
+.traits-row { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:24px; }
+.trait {
+  font-family:'Cinzel', serif;
+  font-size:11px;
+  padding:7px 16px;
+  border-radius:20px;
+  border:1px solid;
+  letter-spacing:1px;
+}
+
+.notable {
+  font-size:13px;
+  opacity:0.6;
+  font-style:italic;
+  margin-bottom:8px;
+  line-height:1.7;
+}
+.notable strong { font-style:normal; color:var(--gold); opacity:1; }
+
+.colours-row {
+  font-family:'Cinzel', serif;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  opacity:0.5;
+  margin-bottom:4px;
+}
+
+.score-bar {
+  margin:28px 0 0;
+  text-align:left;
+}
+.score-title {
+  font-family:'Cinzel', serif;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--gold-dark);
+  margin-bottom:14px;
+  text-align:center;
+}
+.score-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.score-house { font-family:'Cinzel',serif; font-size:11px; width:90px; flex-shrink:0; letter-spacing:1px; }
+.score-track { flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.score-fill { height:100%; border-radius:3px; transition:width 1s ease 0.3s; }
+.score-num { font-family:'Cinzel',serif; font-size:11px; width:24px; text-align:right; color:var(--gold-dark); }
+
+.again-btn {
+  font-family:'Cinzel', serif;
+  font-size:12px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:14px 32px;
+  background:transparent;
+  border:1px solid var(--gold-dark);
+  border-radius:3px;
+  color:var(--gold);
+  cursor:pointer;
+  transition:all 0.3s;
+  margin-top:8px;
+}
+.again-btn:hover { background:var(--gold-dark); color:var(--ink); }
+
+/* House colour sets */
+.g { color:#e8a0a0; } .g-box { border-color:#8B0000; background:rgba(139,0,0,0.1); } .g-trait { border-color:#8B0000; color:#e8a0a0; background:rgba(139,0,0,0.08); } .g-fill { background:#8B0000; }
+.s { color:#7dcfa0; } .s-box { border-color:#1a5c38; background:rgba(26,74,46,0.1); } .s-trait { border-color:#1a5c38; color:#7dcfa0; background:rgba(26,74,46,0.08); } .s-fill { background:#1a5c38; }
+.r { color:#8ab4f0; } .r-box { border-color:#1a3a7a; background:rgba(14,42,92,0.1); } .r-trait { border-color:#1a3a7a; color:#8ab4f0; background:rgba(14,42,92,0.08); } .r-fill { background:#1a3a7a; }
+.h { color:#f0d060; } .h-box { border-color:#c8980a; background:rgba(200,152,10,0.1); } .h-trait { border-color:#c8980a; color:#f0d060; background:rgba(200,152,10,0.08); } .h-fill { background:#c8980a; }
+</style>
+</head>
+<body>
+
+<div class="particles" id="pts"></div>
+
+<div class="page">
+
+  <!-- INTRO -->
+  <div id="screen-intro">
+    <div class="hat-wrap">
+      <span class="hat-emoji">🎩</span>
+    </div>
+    <h1 class="title">Before You Arrive</h1>
+    <div class="subtitle">A Short Test of Character</div>
+    <div class="rule"></div>
+    <p class="intro-text">
+      Before your first Sunday evening, we ask that you complete this short questionnaire. It will take less than two minutes. There are no wrong answers — only honest ones.<br><br>
+      What you discover about yourself may surprise you. It will certainly be relevant on the night.
+    </p>
+    <button class="start-btn" onclick="startQuiz()">Begin</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz">
+    <div class="progress-area">
+      <div class="prog-label" id="prog-label">Question 1 of 10</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="q-card active" id="q1">
+      <div class="q-num">Question 1 of 10</div>
+      <div class="q-text">You find a wallet on the ground with $200 cash inside and no ID. What do you do?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,1,'G')">Turn it in to the nearest authority immediately — it is the right thing to do.</button>
+        <button class="ans-btn" onclick="answer(this,1,'H')">Ask around first to see if anyone nearby lost it before deciding.</button>
+        <button class="ans-btn" onclick="answer(this,1,'R')">Keep it but donate the cash — no ID means no owner to return it to anyway.</button>
+        <button class="ans-btn" onclick="answer(this,1,'S')">Pocket it. No ID, no paper trail. Finders keepers.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q2">
+      <div class="q-num">Question 2 of 10</div>
+      <div class="q-text">A fire breaks out nearby. What is your first instinct?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,2,'G')">Run toward it — someone might need help.</button>
+        <button class="ans-btn" onclick="answer(this,2,'R')">Assess the situation quickly and determine the safest, most effective course of action.</button>
+        <button class="ans-btn" onclick="answer(this,2,'S')">Get yourself to safety first. You cannot help anyone if you are also on fire.</button>
+        <button class="ans-btn" onclick="answer(this,2,'H')">Make sure the people around you are moving and safe before you go.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q3">
+      <div class="q-num">Question 3 of 10</div>
+      <div class="q-text">Which quality do you value most in a close friend?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,3,'G')">Loyalty — someone who has your back no matter what the situation.</button>
+        <button class="ans-btn" onclick="answer(this,3,'R')">Intellectual curiosity — someone who challenges and stimulates you.</button>
+        <button class="ans-btn" onclick="answer(this,3,'H')">Kindness and patience — someone warm, steady, and genuinely dependable.</button>
+        <button class="ans-btn" onclick="answer(this,3,'S')">Ambition — someone who pushes you to be better and think bigger.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q4">
+      <div class="q-num">Question 4 of 10</div>
+      <div class="q-text">You have a free Saturday with no obligations whatsoever. What do you do?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,4,'R')">Deep dive into something you have been meaning to learn — a book, a skill, a rabbit hole.</button>
+        <button class="ans-btn" onclick="answer(this,4,'H')">Spend it with the people you love — a long lunch, a walk, a lazy afternoon.</button>
+        <button class="ans-btn" onclick="answer(this,4,'G')">Something adventurous — a road trip, a hike, something you have never tried.</button>
+        <button class="ans-btn" onclick="answer(this,4,'S')">Work on a personal project or goal you have been letting slip.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q5">
+      <div class="q-num">Question 5 of 10</div>
+      <div class="q-text">How would you most want to be remembered?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,5,'G')">Brave — someone who stood up when it truly mattered.</button>
+        <button class="ans-btn" onclick="answer(this,5,'R')">Wise — someone whose thinking genuinely changed things.</button>
+        <button class="ans-btn" onclick="answer(this,5,'H')">Good — simply kind and fair to everyone who crossed their path.</button>
+        <button class="ans-btn" onclick="answer(this,5,'S')">Powerful — someone who achieved what others said was impossible.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q6">
+      <div class="q-num">Question 6 of 10</div>
+      <div class="q-text">Your group is about to make a decision you believe is wrong. What do you do?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,6,'G')">Speak up clearly and firmly, even if it causes friction.</button>
+        <button class="ans-btn" onclick="answer(this,6,'R')">Present your evidence and reasoning and let the facts do the work.</button>
+        <button class="ans-btn" onclick="answer(this,6,'H')">Look for a middle ground everyone can live with.</button>
+        <button class="ans-btn" onclick="answer(this,6,'S')">Quietly manoeuvre behind the scenes to get the outcome you know is right.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q7">
+      <div class="q-num">Question 7 of 10</div>
+      <div class="q-text">You are offered a shortcut that breaks no rules — but it feels slightly off. Do you take it?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,7,'S')">Absolutely. Not against the rules means it is fair game. Full stop.</button>
+        <button class="ans-btn" onclick="answer(this,7,'R')">Only after thinking through every possible consequence very carefully.</button>
+        <button class="ans-btn" onclick="answer(this,7,'G')">No. The fact that it feels off is reason enough to walk away.</button>
+        <button class="ans-btn" onclick="answer(this,7,'H')">Probably not — you would not want the people you respect to see you take it.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q8">
+      <div class="q-num">Question 8 of 10</div>
+      <div class="q-text">What kind of problem solver are you?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,8,'G')">Act first, adapt as you go — instinct beats analysis in the moment.</button>
+        <button class="ans-btn" onclick="answer(this,8,'R')">Research and plan thoroughly before committing to a single step.</button>
+        <button class="ans-btn" onclick="answer(this,8,'H')">Ask for help and work through it collaboratively with the people around you.</button>
+        <button class="ans-btn" onclick="answer(this,8,'S')">Find the most effective path available, regardless of how unconventional it looks.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q9">
+      <div class="q-num">Question 9 of 10</div>
+      <div class="q-text">Which class would you most want to take at Hogwarts?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,9,'G')">Defence Against the Dark Arts — practical, hands-on, and directly useful when it counts.</button>
+        <button class="ans-btn" onclick="answer(this,9,'R')">Astronomy or Ancient Runes — deep, rare knowledge that few people bother to master.</button>
+        <button class="ans-btn" onclick="answer(this,9,'H')">Herbology — patient, grounding work that produces real, tangible results you can hold.</button>
+        <button class="ans-btn" onclick="answer(this,9,'S')">Potions — precision, craft, and the quiet power to change everything one vial at a time.</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="q10">
+      <div class="q-num">Question 10 of 10</div>
+      <div class="q-text">One last question. When you walk into a room full of strangers, what do people tend to notice about you first?</div>
+      <div class="ans-grid">
+        <button class="ans-btn" onclick="answer(this,10,'G')">That you are confident and direct — you do not hesitate to introduce yourself.</button>
+        <button class="ans-btn" onclick="answer(this,10,'R')">That you are observant — you are already taking everything in before you say a word.</button>
+        <button class="ans-btn" onclick="answer(this,10,'H')">That you are warm — people feel at ease around you almost immediately.</button>
+        <button class="ans-btn" onclick="answer(this,10,'S')">That you carry yourself with intention — there is a quiet purposefulness about you.</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result">
+    <div id="result-box-wrap"></div>
+    <button class="again-btn" onclick="restartQuiz()">Sort Again</button>
+  </div>
+
+</div>
+
+<script>
+var sc = { G:0, H:0, R:0, S:0 };
+var cur = 1;
+var tot = 10;
+
+function startQuiz() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  updateProg();
+}
+
+function answer(btn, qNum, house) {
+  var card = document.getElementById('q' + qNum);
+  card.querySelectorAll('.ans-btn').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  sc[house]++;
+  setTimeout(function() {
+    card.classList.remove('active');
+    cur++;
+    updateProg();
+    if (cur <= tot) {
+      document.getElementById('q' + cur).classList.add('active');
+    } else {
+      showResult();
+    }
+  }, 380);
+}
+
+function updateProg() {
+  var pct = ((cur - 1) / tot) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  var n = Math.min(cur, tot);
+  document.getElementById('prog-label').textContent = 'Question ' + n + ' of ' + tot;
+}
+
+function showResult() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  var rs = document.getElementById('screen-result');
+  rs.style.display = 'block';
+
+  var sorted = [
+    { k:'G', v:sc.G },
+    { k:'H', v:sc.H },
+    { k:'R', v:sc.R },
+    { k:'S', v:sc.S }
+  ].sort(function(a,b){ return b.v - a.v; });
+  var winner = sorted[0].k;
+
+  var data = {
+    G: {
+      crest:'🦁', col:'g', cchar:'🦁',
+      reveal:'The Courageous One',
+      desc:'You act from instinct and lead from the front. You would rather face something head-on than wait and wonder. When something matters, you do not look for permission — you move. That quality is rarer than most people think.',
+      traits:['Brave','Instinctive','Direct','Loyal'],
+      tease:'Your character has been noted. All will be revealed on Sunday.'
+    },
+    S: {
+      crest:'🐍', col:'s', cchar:'🐍',
+      reveal:'The Determined One',
+      desc:'You think before you speak and you play the long game. You know what you want, and you are precise about how you pursue it. Most people call this ambition. The Wizarding World has another word for it entirely.',
+      traits:['Ambitious','Strategic','Resourceful','Focused'],
+      tease:'Your character has been noted. All will be revealed on Sunday.'
+    },
+    R: {
+      crest:'🦅', col:'r', cchar:'🦅',
+      reveal:'The Curious One',
+      desc:'You are driven by a need to understand. You observe before you act, you ask questions others do not think to ask, and you are rarely satisfied with the surface answer. The Wizarding World values this more than you might expect.',
+      traits:['Curious','Perceptive','Thoughtful','Creative'],
+      tease:'Your character has been noted. All will be revealed on Sunday.'
+    },
+    H: {
+      crest:'🦡', col:'h', cchar:'🦡',
+      reveal:'The Steadfast One',
+      desc:'You are the person people count on. You show up, you do the work, and you treat everyone around you with genuine fairness. This is not ordinary. In a world that rewards flash and cleverness, what you have is quietly extraordinary.',
+      traits:['Loyal','Dependable','Fair','Warm'],
+      tease:'Your character has been noted. All will be revealed on Sunday.'
+    }
+  };
+
+  var h = data[winner];
+  var c = h.col;
+  var traitHTML = h.traits.map(function(t){
+    return '<span class="trait ' + c + '-trait">' + t + '</span>';
+  }).join('');
+
+  document.getElementById('result-box-wrap').innerHTML =
+    '<div class="result-box ' + c + '-box" style="--crest-char:\'' + h.cchar + '\'">' +
+      '<span class="crest">' + h.crest + '</span>' +
+      '<div class="house-name ' + c + '">' + h.reveal + '</div>' +
+      '<p class="house-desc">' + h.desc + '</p>' +
+      '<div class="traits-row">' + traitHTML + '</div>' +
+      '<p class="house-desc" style="font-size:13px;margin-top:8px;opacity:0.6;">' + h.tease + '</p>' +
+    '</div>';
+}
+
+function restartQuiz() {
+  sc.G = sc.H = sc.R = sc.S = 0;
+  cur = 1;
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'block';
+  document.querySelectorAll('.q-card').forEach(function(c){
+    c.classList.remove('active');
+    c.querySelectorAll('.ans-btn').forEach(function(b){ b.classList.remove('selected'); });
+  });
+  document.getElementById('q1').classList.add('active');
+  updateProg();
+}
+
+// Stars
+var pts = document.getElementById('pts');
+for (var i = 0; i < 60; i++) {
+  var p = document.createElement('div');
+  p.className = 'p';
+  p.style.left = (Math.random() * 100) + '%';
+  p.style.top = (Math.random() * 100) + '%';
+  p.style.setProperty('--d', (2 + Math.random() * 5) + 's');
+  p.style.setProperty('--del', (-Math.random() * 6) + 's');
+  pts.appendChild(p);
+}
+</script>
+</body>
+</html>

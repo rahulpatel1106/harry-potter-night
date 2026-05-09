@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Hogwarts Invitation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  min-height: 100vh;
+  background: #0e0b04;
+  font-family: 'IM Fell English', serif;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(139,0,0,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(90,60,10,0.18) 0%, transparent 50%),
+    #0e0b04;
+}
+
+.particles { position:fixed; inset:0; pointer-events:none; z-index:1; }
+.p {
+  position:absolute; width:2px; height:2px;
+  background:rgba(201,168,76,0.7); border-radius:50%;
+  animation:twinkle var(--d,4s) ease-in-out infinite var(--del,0s);
+}
+@keyframes twinkle { 0%,100%{opacity:0.05;} 50%{opacity:0.8;} }
+
+.scene {
+  position:relative; z-index:2;
+  width:100%; max-width:560px;
+  display:flex; flex-direction:column; align-items:center;
+}
+
+.owl-hint {
+  font-family:'Cinzel', serif;
+  font-size:10px; letter-spacing:4px;
+  text-transform:uppercase;
+  color:rgba(201,168,76,0.4);
+  margin-bottom:20px;
+  animation:fadeIn 1.5s ease 0.5s both;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+/* ══ ENVELOPE ══ */
+.env-wrap {
+  width:100%;
+  position:relative;
+  cursor:pointer;
+  animation:envAppear 1s ease 0.4s both;
+}
+@keyframes envAppear {
+  from{opacity:0;transform:translateY(40px) scale(0.95);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.env-wrap:not(.opened):hover { transform:translateY(-6px); transition:transform 0.3s; }
+
+/* The SVG-based envelope uses a flat box approach with CSS panels */
+.envelope {
+  width:100%;
+  padding-bottom:62%; /* aspect ratio ~1.618:1 */
+  position:relative;
+  filter:drop-shadow(0 20px 60px rgba(0,0,0,0.85)) drop-shadow(0 0 30px rgba(201,168,76,0.07));
+}
+
+/* Base / back */
+.env-base {
+  position:absolute; inset:0;
+  background:linear-gradient(160deg,#c9a96a 0%,#9c7230 50%,#7a5418 100%);
+  border-radius:4px;
+}
+
+/* Left flap */
+.env-left {
+  position:absolute;
+  top:0; bottom:0; left:0;
+  width:50%;
+  background:linear-gradient(135deg,#b8924a 0%,#8a6020 100%);
+  clip-path:polygon(0 0, 100% 50%, 0 100%);
+  border-radius:4px 0 0 4px;
+  z-index:2;
+}
+
+/* Right flap */
+.env-right {
+  position:absolute;
+  top:0; bottom:0; right:0;
+  width:50%;
+  background:linear-gradient(225deg,#b8924a 0%,#8a6020 100%);
+  clip-path:polygon(100% 0, 0 50%, 100% 100%);
+  border-radius:0 4px 4px 0;
+  z-index:2;
+}
+
+/* Bottom flap */
+.env-bottom {
+  position:absolute;
+  bottom:0; left:0; right:0;
+  height:54%;
+  background:linear-gradient(180deg,#b89050 0%,#8a6020 100%);
+  clip-path:polygon(0 100%, 50% 0%, 100% 100%);
+  border-radius:0 0 4px 4px;
+  z-index:3;
+}
+
+/* Letter peeking — sits behind flap in z-order */
+.env-letter-peek {
+  position:absolute;
+  bottom:5%; left:8%; right:8%;
+  height:78%;
+  background:#f5ecd7;
+  border-radius:2px;
+  z-index:4;
+  transform:translateY(100%);
+  transition:transform 0.7s cubic-bezier(0.34,1.2,0.64,1) 0.55s;
+  box-shadow:0 -2px 16px rgba(0,0,0,0.3);
+}
+.env-wrap.opened .env-letter-peek {
+  transform:translateY(-15%);
+}
+
+/* Top flap — folds open */
+.env-flap {
+  position:absolute;
+  top:0; left:0; right:0;
+  height:54%;
+  background:linear-gradient(180deg,#c8a050 0%,#986820 100%);
+  clip-path:polygon(0 0, 100% 0, 50% 100%);
+  border-radius:4px 4px 0 0;
+  z-index:6;
+  transform-origin:top center;
+  transition:transform 0.85s cubic-bezier(0.4,0,0.2,1);
+}
+.env-flap::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(160deg,rgba(255,255,255,0.14) 0%,transparent 55%);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  pointer-events:none;
+}
+.env-wrap.opened .env-flap {
+  transform:rotateX(-175deg);
+}
+
+/* Wax seal */
+.wax {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  z-index:7;
+  width:62px; height:62px;
+  background:radial-gradient(circle at 35% 30%,#dd2200,#7a0000);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+  box-shadow:0 4px 20px rgba(139,0,0,0.65), inset 0 2px 4px rgba(255,255,255,0.12);
+  border:2px solid rgba(255,180,150,0.15);
+  transition:transform 0.5s ease 0.1s, opacity 0.4s ease 0.1s;
+}
+.env-wrap.opened .wax {
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+}
+
+.tap-hint {
+  margin-top:14px;
+  font-family:'Cinzel',serif;
+  font-size:10px; letter-spacing:3px;
+  text-transform:uppercase;
+  color:rgba(201,168,76,0.45);
+  text-align:center;
+  animation:pulse 2.5s ease-in-out infinite 1.5s;
+}
+@keyframes pulse { 0%,100%{opacity:0.45;} 50%{opacity:0.9;} }
+.env-wrap.opened ~ .tap-hint { display:none; }
+
+/* ══ LETTER ══ */
+.letter-container {
+  width:100%;
+  margin-top:28px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 0.8s ease 1s, transform 0.8s ease 1s;
+  pointer-events:none;
+}
+.letter-container.visible {
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:all;
+}
+
+.letter {
+  background:#f5ecd7;
+  color:#1a1008;
+  border-radius:2px;
+  position:relative;
+  box-shadow:0 8px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(139,90,10,0.3);
+  overflow:hidden;
+}
+.letter::before {
+  content:'';
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    0deg, transparent, transparent 27px,
+    rgba(139,90,10,0.055) 27px, rgba(139,90,10,0.055) 28px
+  );
+  pointer-events:none; z-index:0;
+}
+.letter::after {
+  content:'⚡';
+  position:absolute; font-size:200px; opacity:0.025;
+  bottom:-30px; right:-10px;
+  pointer-events:none; z-index:0; line-height:1;
+}
+
+.li {
+  position:relative; z-index:1;
+  padding:48px 52px 52px;
+}
+@media(max-width:520px){ .li{ padding:30px 24px 34px; } }
+
+.l-crest {
+  text-align:center;
+  margin-bottom:28px; padding-bottom:20px;
+  border-bottom:1px solid rgba(139,90,10,0.2);
+  position:relative;
+}
+.l-crest::after {
+  content:'';
+  position:absolute; bottom:-1px; left:50%;
+  transform:translateX(-50%);
+  width:50px; height:2px;
+  background:linear-gradient(90deg,transparent,rgba(139,0,0,0.45),transparent);
+}
+.l-icon { font-size:32px; display:block; margin-bottom:8px; }
+.l-school {
+  font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(13px,2.8vw,18px);
+  color:#3a1a00; letter-spacing:1px; line-height:1.4;
+}
+.l-school-sub {
+  font-family:'Cinzel',serif;
+  font-size:9px; letter-spacing:3px;
+  color:rgba(58,26,0,0.48);
+  text-transform:uppercase; margin-top:6px;
+}
+
+.l-addr { margin-bottom:22px; }
+.l-al {
+  font-family:'Cinzel',serif;
+  font-size:11px; color:#3a1a00;
+  letter-spacing:1px; line-height:2; opacity:0.6;
+}
+.l-al.b { opacity:1; font-size:12px; font-weight:600; letter-spacing:2px; }
+
+.l-dear { font-size:16px; color:#1a0800; margin-bottom:18px; font-style:italic; }
+.l-dear strong { font-style:normal; font-family:'Cinzel',serif; font-size:17px; }
+
+.l-body p {
+  font-size:14px; color:#1a0800;
+  line-height:1.95; margin-bottom:14px;
+  text-align:justify;
+}
+
+.sched {
+  margin:20px 0;
+  padding:14px 16px;
+  background:rgba(139,0,0,0.05);
+  border-left:3px solid rgba(139,0,0,0.32);
+}
+.si {
+  font-family:'Cinzel',serif;
+  font-size:10.5px; letter-spacing:0.4px;
+  color:#3a1a00; padding:5px 0;
+  display:flex; gap:10px; align-items:baseline;
+  border-bottom:1px solid rgba(139,90,10,0.1);
+}
+.si:last-child { border-bottom:none; }
+.si-lbl { color:#8B0000; font-weight:600; white-space:nowrap; min-width:78px; }
+
+.l-note {
+  margin:20px 0;
+  padding:12px 16px;
+  background:rgba(201,168,76,0.07);
+  border:1px solid rgba(139,90,10,0.16);
+  border-radius:2px;
+  font-size:13px; color:#3a1a00;
+  font-style:italic; line-height:1.7;
+}
+
+.l-sign { margin-top:28px; }
+.l-sign-line { font-size:15px; color:#1a0800; margin-bottom:4px; }
+.l-sig {
+  font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(12px,2.5vw,15px);
+  color:#8B0000; margin:10px 0 2px;
+}
+.l-sig-t {
+  font-family:'Cinzel',serif;
+  font-size:9px; letter-spacing:2px;
+  color:rgba(58,26,0,0.48);
+  text-transform:uppercase;
+}
+
+.l-foot {
+  margin-top:30px; padding-top:16px;
+  border-top:1px solid rgba(139,90,10,0.16);
+  text-align:center;
+}
+.l-houses { font-size:18px; letter-spacing:10px; margin-bottom:8px; }
+.l-motto {
+  font-family:'Cinzel',serif;
+  font-size:9px; letter-spacing:4px;
+  color:rgba(58,26,0,0.35);
+  text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="particles" id="pts"></div>
+
+<div class="scene">
+
+  <div class="owl-hint">You have received an owl post</div>
+
+  <div class="env-wrap" id="envWrap" onclick="openEnvelope()">
+    <div class="envelope">
+      <div class="env-base"></div>
+      <div class="env-left"></div>
+      <div class="env-right"></div>
+      <div class="env-bottom"></div>
+      <div class="env-letter-peek"></div>
+      <div class="env-flap"></div>
+      <div class="wax">⚡</div>
+    </div>
+  </div>
+
+  <div class="tap-hint" id="tapHint">Click to open</div>
+
+  <div class="letter-container" id="letterContainer">
+    <div class="letter">
+      <div class="li">
+
+        <div class="l-crest">
+          <span class="l-icon">🦉</span>
+          <div class="l-school">Hogwarts School<br>of Witchcraft &amp; Wizardry</div>
+          <div class="l-school-sub">Headmistress: Professor M. McGonagall &nbsp;·&nbsp; Est. 990 A.D.</div>
+        </div>
+
+        <div class="l-addr">
+          <div class="l-al">To the Newly Invited,</div>
+          <div class="l-al b">Witches, Wizards &amp; Honoured Guests</div>
+          <div class="l-al">Sunday Evening — The First of Many</div>
+        </div>
+
+        <div class="l-dear">Dear <strong>Muggles &amp; Wizards-in-Training,</strong></div>
+
+        <div class="l-body">
+          <p>You have been invited to enter the Wizarding World. Come Sunday evening with an empty stomach and an open mind. The rest will take care of itself.</p>
+
+          <div class="l-note">
+            📜 &nbsp;One thing is required of you before you arrive. Complete your character assessment below. It will take two minutes. Do not overthink it.
+          </div>
+
+          <div style="text-align:center;margin:28px 0 8px;">
+            <a href="wizarding-world-personality-test.html" style="display:inline-block;font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:14px 32px;background:transparent;border:1px solid rgba(139,0,0,0.4);border-radius:2px;color:#8B0000;text-decoration:none;" onmouseover="this.style.background='rgba(139,0,0,0.08)'" onmouseout="this.style.background='transparent'">Begin Your Assessment →</a>
+          </div>
+        </div>
+
+        <div class="l-sign">
+          <div class="l-sign-line">Yours most sincerely,</div>
+          <div class="l-sig">Professor M. McGonagall</div>
+          <div class="l-sig-t">Deputy Headmistress &nbsp;·&nbsp; Hogwarts School of Witchcraft &amp; Wizardry</div>
+          <div class="l-sig-t" style="margin-top:3px;">On behalf of Albus P.W.B. Dumbledore, Headmaster</div>
+        </div>
+
+        <div class="l-foot">
+          <div class="l-houses">🦁 🐍 🦅 🦡</div>
+          <div class="l-motto">Draco Dormiens Nunquam Titillandus</div>
+          <div class="l-motto" style="margin-top:3px;font-size:8px;opacity:0.5;">Never Tickle a Sleeping Dragon</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var opened = false;
+
+function openEnvelope() {
+  if (opened) return;
+  opened = true;
+  document.getElementById('envWrap').classList.add('opened');
+  document.getElementById('envWrap').style.cursor = 'default';
+  document.getElementById('tapHint').style.display = 'none';
+  setTimeout(function() {
+    document.getElementById('letterContainer').classList.add('visible');
+  }, 700);
+}
+
+var pts = document.getElementById('pts');
+for (var i = 0; i < 40; i++) {
+  var p = document.createElement('div');
+  p.className = 'p';
+  p.style.left = (Math.random() * 100) + '%';
+  p.style.top = (Math.random() * 100) + '%';
+  p.style.setProperty('--d', (3 + Math.random() * 6) + 's');
+  p.style.setProperty('--del', (-Math.random() * 8) + 's');
+  pts.appendChild(p);
+}
+</script>
+</body>
+</html>
